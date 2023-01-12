@@ -62,30 +62,32 @@ Now save it. You need to use it whe login the dashboard.
 
 ```bash
 cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   namespace: kubernetes-dashboard
   name: kubernetes-dashboard-ingress
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    kubernetes.io/tls-acme: 'true'
+    kubernetes.io/ingress.class: 'nginx'
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    # Uncomment next if you use https://cert-manager.io/
-    #cert-manager.io/cluster-issuer: "<YOUR CLUSTER ISSUER>"
 spec:
   tls:
-  - hosts:
-    - <YOUR DOMAIN HERE>
-    secretName: kubernetes-dashboard-cert
+    - hosts:
+        - dashboard.khuonviet.vn
+      secretName: 'kubernetes-dashboard-cert'
   rules:
-  - host: <YOUR DOMAIN HERE>
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: kubernetes-dashboard
-          servicePort: 443
+    - host: dashboard.khuonviet.vn
+      http:
+        paths:
+          - pathType: Prefix
+            path: '/'
+            backend:
+              service:
+                name: kubernetes-dashboard
+                port:
+                  number: 443
 EOF
 ```
 
